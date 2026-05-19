@@ -32,6 +32,53 @@ async function run() {
     const facilitiesCollection = database.collection("facilities");
     const bookingCollection = database.collection("booking");
 
+    app.get("/facilities", async (req, res) => {
+      const result = await facilitiesCollection.find().toArray();
+      res.json(result);
+    });
+
+    app.get("/facilities/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = {
+        _id: new ObjectId(id),
+      };
+
+      const result = await facilitiesCollection.findOne(query);
+      res.json(result);
+    });
+
+    // // add a new facility
+    app.post("/facilities", async (req, res) => {
+      const newFacility = req.body;
+      const result = await facilitiesCollection.insertOne(newFacility);
+      res.send(result);
+    });
+
+    app.delete("/facilities/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const query = {
+        _id: new ObjectId(id),
+      };
+
+      const result = await facilitiesCollection.deleteOne(query);
+
+      res.send(result);
+    });
+
+    app.patch("/facilities/:id", async (req, res) => {
+      const updatedData = req.body;
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      updatedDoc = {
+        $set: updatedData,
+      };
+      const result = await facilitiesCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
@@ -51,50 +98,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
-
-// app.get("/destination", async (req, res) => {
-//   const result = await destinationCollection.find().toArray();
-//   res.json(result);
-// });
-
-// app.get("/destination/:id", async (req, res) => {
-//   const id = req.params.id;
-//   console.log(id);
-
-//   const query = {
-//     _id: new ObjectId(id),
-//   };
-
-//   const result = await destinationCollection.findOne(query);
-//   res.json(result);
-// });
-
-// // add a new destination
-// app.post("/destination", async (req, res) => {
-//   const newDestination = req.body;
-//   const result = await destinationCollection.insertOne(newDestination);
-//   res.send(result);
-// });
-
-// app.patch("/destination/:id", async (req, res) => {
-//   const updatedData = req.body;
-//   const id = req.params.id;
-//   const filter = { _id: new ObjectId(id) };
-//   updatedDoc = {
-//     $set: updatedData,
-//   };
-//   const result = await destinationCollection.updateOne(filter, updatedDoc);
-//   res.send(result);
-// });
-
-// app.delete("/destination/:id", async (req, res) => {
-//   const id = req.params.id;
-
-//   const query = {
-//     _id: new ObjectId(id),
-//   };
-
-//   const result = await destinationCollection.deleteOne(query);
-
-//   res.send(result);
-// });
