@@ -32,21 +32,48 @@ async function run() {
     const facilitiesCollection = database.collection("facilities");
     const bookingCollection = database.collection("booking");
 
+    // ===========================================================
+    // ================= Facilities API ===============
+    // ===========================================================
+
     app.get("/facilities", async (req, res) => {
-      const result = await facilitiesCollection.find().toArray();
-      res.json(result);
+      try {
+        const email = req.query.email; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
+
+        let query = {}; // ডিফল্টভাবে কুয়েরি খালি, অর্থাৎ সব ডাটা আসবে
+
+        // যদি ইমেইল পাঠানো হয়, তবে কুয়েরিতে ownerEmail যোগ হবে
+        if (email) {
+          query = { ownerEmail: email };
+        }
+
+        const result = await facilitiesCollection.find(query).toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    app.get("/facilities/limited", async (req, res) => {
+      try {
+        // কোনো কুয়েরি ছাড়াই সরাসরি প্রথম ৬টি ডাটা ফেচ করবে
+        const result = await facilitiesCollection.find({}).limit(6).toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+      }
     });
 
     app.get("/facilities/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
 
       const query = {
         _id: new ObjectId(id),
       };
 
       const result = await facilitiesCollection.findOne(query);
-      res.json(result);
+
+      res.send(result);
     });
 
     // // add a new facility
@@ -79,7 +106,10 @@ async function run() {
       res.send(result);
     });
 
+    // ===========================================================
     // Send a ping to confirm a successful connection
+    // ===========================================================
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!",
