@@ -38,19 +38,37 @@ async function run() {
 
     app.get("/facilities", async (req, res) => {
       try {
-        const email = req.query.email; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
+        const email = req.query.email || "";
+        const search = req.query.search || "";
+        const type = req.query.type || "";
 
-        let query = {}; // ডিফল্টভাবে কুয়েরি খালি, অর্থাৎ সব ডাটা আসবে
+        const query = {};
 
-        // যদি ইমেইল পাঠানো হয়, তবে কুয়েরিতে ownerEmail যোগ হবে
+        // email filter (manage facility)
         if (email) {
-          query = { ownerEmail: email };
+          query.ownerEmail = email;
+        }
+
+        // search by facility name
+        if (search) {
+          query.name = {
+            $regex: search,
+            $options: "i",
+          };
+        }
+
+        // facility type filter
+        if (type) {
+          query.type = type;
         }
 
         const result = await facilitiesCollection.find(query).toArray();
+
         res.json(result);
       } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({
+          error: "Internal Server Error",
+        });
       }
     });
 
@@ -112,36 +130,9 @@ async function run() {
 
     app.get("/bookings", async (req, res) => {
       try {
-        const email = req.query.email; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
+        const email = req.query.userEmail; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
 
-        // let query = {}; // ডিফল্টভাবে কুয়েরি খালি, অর্থাৎ সব ডাটা আসবে
-
-        // যদি ইমেইল পাঠানো হয়, তবে কুয়েরিতে userEmail যোগ হবে
-        if (email) {
-          query = { userEmail: email };
-        }
-
-        const result = await bookingCollection.find(query).toArray();
-        res.json(result);
-      } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-      }
-    });
-
-    // ===========================================================
-    // =============== Booking API ===============
-    // ===========================================================
-
-    app.get("/bookings", async (req, res) => {
-      try {
-        const email = req.query.email; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
-
-        // let query = {}; // ডিফল্টভাবে কুয়েরি খালি, অর্থাৎ সব ডাটা আসবে
-
-        // যদি ইমেইল পাঠানো হয়, তবে কুয়েরিতে userEmail যোগ হবে
-        if (email) {
-          query = { userEmail: email };
-        }
+        const query = { userEmail: email };
 
         const result = await bookingCollection.find(query).toArray();
         res.json(result);
