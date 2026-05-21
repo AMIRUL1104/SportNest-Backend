@@ -107,6 +107,28 @@ async function run() {
     });
 
     // ===========================================================
+    // =============== Booking API ===============
+    // ===========================================================
+
+    app.get("/bookings", async (req, res) => {
+      try {
+        const email = req.query.email; // ফ্রন্টএন্ড থেকে ইমেইল কুয়েরি প্যারামিটারে আসবে
+
+        // let query = {}; // ডিফল্টভাবে কুয়েরি খালি, অর্থাৎ সব ডাটা আসবে
+
+        // যদি ইমেইল পাঠানো হয়, তবে কুয়েরিতে userEmail যোগ হবে
+        if (email) {
+          query = { userEmail: email };
+        }
+
+        const result = await bookingCollection.find(query).toArray();
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    // ===========================================================
     // Send a ping to confirm a successful connection
     // ===========================================================
 
